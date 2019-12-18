@@ -6,6 +6,5 @@
 -e git+http://github.com/openaustralia/scraperwiki-python.git@morph_defaults#egg=scraperwiki
 
 pandas==0.24.2
-sqlite3
 requests==2.21.0
 bs4==4.7.1
