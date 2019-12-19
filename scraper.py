@@ -36,13 +36,12 @@ def item_scrapping(name):
 	total = len(items['url'])
 	url = items['url']
 	item_no = 0
-	while item_no <= total:
+	while item_no <= total-1:
 		try:
 			try:
 				print("Scrapping item "+str(url_number)+" of "+str(total))
 				
 				response = requests.get(url=url[item_no],timeout= 10)		
-
 				soup = BeautifulSoup(response.text, 'html.parser')
 				title           =   soup.find('span',{'id':"ctl00_PlaceHolderMain_pdTopControl_uc_ProductDetailsTitleControl_lab_Title"}).getText()
 				VPN             =   str(soup.find('span',{'id':"ctl00_PlaceHolderMain_pdTopControl_uc_ProductDetailsVPNSummaryControl_lab_VPNValue"}).getText()).replace(":","").strip()
@@ -51,6 +50,27 @@ def item_scrapping(name):
 				category        =   soup.find('a',{'id':"ctl00_PlaceHolderMain_pdTopControl_uc_ProductDetailsTitleControl_lnk_CatSearch"}).getText()
 				sub_category    =   soup.find('a',{'id':"ctl00_PlaceHolderMain_pdTopControl_uc_ProductDetailsTitleControl_lnk_SubCatSearch"}).getText()
 				Description 	=	soup.find('span',{'id':"ctl00_PlaceHolderMain_pdTopControl_uc_ProductDetailsDescriptionControl_lab_AbridgedDescription"}).getText()
+				SKU				=	str(url[item_no]).split("=")[1]
+				UPC				=	str(soup.find('div',{'class':"info-codes-hidden hide"}).findAll('span')[3].getText())
+				Packaging_info	=	soup.find('div',{'class':"packaging-data-parent"}).getText()
+
+				Specs			= ""
+				Warranty		= ""
+				check = 0
+				tables	=	soup.find('div',{'class':"extended pi"}).findAll('table')
+				for tab in tables:
+					text = tab.getText()
+
+					if 'Basic' in text:
+						Specs= ' '.join(str(text.replace('\n',' ').strip()).split())
+						check += 1
+					elif 'Limited Warranty' in text:
+						Warranty = ' '.join(str(text.replace('\n',' ').strip()).split())
+						check += 1
+					if check >= 2:
+						break
+				
+
 				if not Description:
 					Description = str(soup.find('div',{'class',"product-summary-descr-new"}).find('div',{'id':"pnl_FullDescription"}).getText()).replace("\n"," ").replace("Read More","").replace(">","").strip()
 
@@ -68,9 +88,13 @@ def item_scrapping(name):
 				except:
 					related_produts = ""
 
-				df = pd.DataFrame([[title,VPN,Brand,price,Description,image_urls,category,sub_category,related_produts,url[item_no]]],columns=['Title','Procut_VPN','Brand','Price','Description','Images','Category','Sub_Category','Related_Products_VPN','URL'])
-				
-				df.to_csv('Scrapped_Data3e.csv', index=False,header=False,mode='a')
+				df = pd.DataFrame([[title,VPN,Brand,price,Description,image_urls,category,sub_category,related_produts,url[item_no],SKU,UPC,Warranty,Packaging_info,Specs]],columns=['Title','Procut_VPN','Brand','Price','Description','Images','Category','Sub_Category','Related_Products_VPN','URL','SKU','UPC','Warranty','Packaging_info','Specificaiton'])
+				if iter == 0:
+					df.to_csv('Scrapped_Data_'+str(name)+'.csv',index=False)
+					
+					iter = 1
+				else:
+					df.to_csv('Scrapped_Data_'+str(name)+'.csv', index=False,header=False,mode='a')
 
 				item_no += 1
 				url_number += 1
@@ -85,11 +109,11 @@ def item_scrapping(name):
 						continue
 
 		except:
-			print("Error in Item: "+ str(url_number-1))
+			print("Error in Item: "+ str(url_number))
 			item_no += 1
 			url_number += 1
 
-item_scrapping("file_1e.csv")
+item_scrapping("files0.csv")
 data = pd.read_csv('Scrapped_Data3e.csv')
 conn = sqlite3.connect("data.sqlite")
 
