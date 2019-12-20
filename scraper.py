@@ -113,7 +113,7 @@ def item_scrapping(name):
 			item_no += 1
 			url_number += 1
 
-item_scrapping("files0.csv")
+item_scrapping("filestest.csv")
 data = pd.read_csv('Scrapped_Data3e.csv')
 conn = sqlite3.connect("data.sqlite")
 
