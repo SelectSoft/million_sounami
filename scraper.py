@@ -39,7 +39,7 @@ def item_scrapping(name):
 	while item_no <= total-1:
 		try:
 			try:
-				print("Scrapping item "+str(url_number)+" of "+str(total))
+				
 				
 				response = requests.get(url=url[item_no],timeout= 10)		
 				soup = BeautifulSoup(response.text, 'html.parser')
@@ -99,17 +99,17 @@ def item_scrapping(name):
 				item_no += 1
 				url_number += 1
 			except requests.ConnectionError:
-				print("No internet connection")
+				
 				while True:
 					try:
 						requests.get('https://www.google.com/')
-						print("Internet Connection available")		
+							
 						break
 					except requests.ConnectionError:
 						continue
 
 		except:
-			print("Error in Item: "+ str(url_number))
+			
 			item_no += 1
 			url_number += 1
 
